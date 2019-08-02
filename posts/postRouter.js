@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
     );
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validatePostId, (req, res) => {
   const { id } = req.params;
   db.getById(id)
     .then(posts => res.status(200).json(posts))
@@ -23,7 +23,7 @@ router.get("/:id", (req, res) => {
     );
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id",validatePostId, (req, res) => {
   const { id } = req.params;
   db.remove(id)
     .then(post =>
@@ -38,8 +38,7 @@ router.delete("/:id", (req, res) => {
     );
 });
 
-//update post
-router.put("/:id", (req, res) => {
+router.put("/:id",validatePostId, (req, res) => {
   const { id } = req.params;
   const { title, contents } = req.body;
   if (!id)
@@ -70,8 +69,18 @@ router.put("/:id", (req, res) => {
 
 // custom middleware
 
-function validatePostId(req, res, next) {
-
+async function validatePostId(req, res, next) {
+  try {
+    const post = await db.getById(req.params.id);
+    if (post) {
+        req.post = post;
+        next();
+    } else {
+        res.status(404).json({ message: "Invalid post id" })
+    }
+} catch (err) {
+    res.status(500).json({ message: "Failed to process request" });
+}
 };
 
 module.exports = router;

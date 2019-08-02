@@ -1,4 +1,3 @@
-// code away!
 const server = require('./server.js');
 const port = process.env.PORT || 8252;
 
